@@ -849,3 +849,331 @@ module.exports = { getUserProfile, updateUserAddress };
 // ✔ Secure one-time flow
 
 // Zomato, Swiggy, Paytm, all same process.
+
+
+
+
+
+
+
+
+
+
+// ✅ Task 7 – Role System + Protected Admin Routes
+
+// Hum ye 4 steps karenge:
+
+// Step 1 — User model me role field add
+
+// Default → "user"
+// Admin → "admin"
+
+// Step 2 — Middleware: auth + adminAuth
+
+// auth → JWT verify
+
+// adminAuth → check role = admin
+
+// Step 3 — Admin can perform restricted actions
+
+// (Example: Restaurant Add/Update/Delete)
+
+// Step 4 — Assign admin role manually (for testing)
+// 🔥 Step 1 — User Model Update
+
+// models/User.js → role add karo:
+
+// const userSchema = new mongoose.Schema(
+//   {
+//     name: {
+//       type: String,
+//       required: true,
+//       trim: true,
+//     },
+
+//     email: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//       lowercase: true,
+//     },
+
+//     password: {
+//       type: String,
+//       required: true,
+//     },
+
+//     phone: {
+//       type: String,
+//       default: "",
+//     },
+
+//     address: {
+//       type: String,
+//       default: "",
+//     },
+
+//     role: {
+//       type: String,
+//       enum: ["user", "admin"],
+//       default: "user",
+//     },
+
+//     refreshToken: {
+//       type: String,
+//       default: null,
+//     },
+
+//     otp: String,
+//     otpExpiry: Number,
+//   },
+//   { timestamps: true }
+// );
+
+
+// Default role = user
+// Agar admin banana hai → manually DB me update.
+
+
+
+// 🔥 Step 3 — Admin Middleware
+
+// middlewares/admin.js
+
+// exports.adminAuth = (req, res, next) => {
+//   if (req.user.role !== "admin") {
+//     return res.status(403).json({ message: "Access denied! Admin only." });
+//   }
+
+//   next();
+// };
+
+// 🔥 Step 4 — Example Admin Route (Restaurant Add)
+
+// routes/restaurantRoutes.js
+
+// router.post("/add", auth, adminAuth, addRestaurant);
+
+
+// Iska matlab:
+
+// JWT → Valid?
+
+// User → Admin?
+
+// Yes → Add restaurant allowed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 📦 Task 8 – Restaurant Module Structure
+
+// Hum 4 files banayenge:
+
+// 1️⃣ models/Restaurant.js
+// 2️⃣ controllers/restaurantController.js
+// 3️⃣ routes/restaurantRoutes.js
+// 4️⃣ server.js me routes mount
+
+// Aur har route me:
+
+// auth (user authenticated hai)
+
+// adminAuth (role = admin)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 📦 Task 8 – Restaurant Module Structure
+
+// Hum 4 files banayenge:
+
+// 1️⃣ models/Restaurant.js
+// 2️⃣ controllers/restaurantController.js
+// 3️⃣ routes/restaurantRoutes.js
+// 4️⃣ server.js me routes mount
+
+// Aur har route me:
+
+// auth (user authenticated hai)
+
+// adminAuth (role = admin)
+
+// 🔥 Step 1 – Restaurant Model
+
+// models/Restaurant.js
+
+// const mongoose = require("mongoose");
+
+// const restaurantSchema = new mongoose.Schema(
+//   {
+//     name: { type: String, required: true },
+//     address: { type: String, required: true },
+//     city: { type: String, required: true },
+//     cuisine: { type: String, required: true },
+//     image: { type: String, default: "" },
+//     rating: { type: Number, default: 0 },
+//     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+//   },
+//   { timestamps: true }
+// );
+
+// module.exports = mongoose.model("Restaurant", restaurantSchema);
+
+// 🔥 Step 2 – Restaurant Controller (Admin CRUD)
+
+// controllers/restaurantController.js
+
+// ✅ 1. Add Restaurant (Admin Only)
+// const Restaurant = require("../models/Restaurant");
+
+// exports.addRestaurant = async (req, res) => {
+//   try {
+//     const { name, address, city, cuisine, image } = req.body;
+
+//     const restaurant = await Restaurant.create({
+//       name,
+//       address,
+//       city,
+//       cuisine,
+//       image,
+//       createdBy: req.user._id,
+//     });
+
+//     res.json({
+//       message: "Restaurant added successfully!",
+//       restaurant,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: "Something went wrong!", error });
+//   }
+// };
+
+// ✅ 2. Get All Restaurants
+// exports.getAllRestaurants = async (req, res) => {
+//   try {
+//     const restaurants = await Restaurant.find().sort({ createdAt: -1 });
+
+//     res.json(restaurants);
+//   } catch (err) {
+//     res.status(500).json({ message: "Something went wrong!", err });
+//   }
+// };
+
+// ✅ 3. Get Single Restaurant
+// exports.getRestaurantById = async (req, res) => {
+//   try {
+//     const restaurant = await Restaurant.findById(req.params.id);
+
+//     if (!restaurant) {
+//       return res.status(404).json({ message: "Restaurant not found!" });
+//     }
+
+//     res.json(restaurant);
+//   } catch (err) {
+//     res.status(500).json({ message: "Something went wrong!", err });
+//   }
+// };
+
+// ✅ 4. Update Restaurant (Admin Only)
+// exports.updateRestaurant = async (req, res) => {
+//   try {
+//     const updated = await Restaurant.findByIdAndUpdate(
+//       req.params.id,
+//       req.body,
+//       { new: true }
+//     );
+
+//     if (!updated) {
+//       return res.status(404).json({ message: "Restaurant not found!" });
+//     }
+
+//     res.json({
+//       message: "Restaurant updated successfully!",
+//       updated,
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Something went wrong!", err });
+//   }
+// };
+
+// ✅ 5. Delete Restaurant (Admin Only)
+// exports.deleteRestaurant = async (req, res) => {
+//   try {
+//     const deleted = await Restaurant.findByIdAndDelete(req.params.id);
+
+//     if (!deleted) {
+//       return res.status(404).json({ message: "Restaurant not found!" });
+//     }
+
+//     res.json({
+//       message: "Restaurant deleted successfully!",
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Something went wrong!", err });
+//   }
+// };
+
+// 🔥 Step 3 – Restaurant Routes
+
+// routes/restaurantRoutes.js
+
+// const express = require("express");
+// const router = express.Router();
+
+// const {
+//   addRestaurant,
+//   getAllRestaurants,
+//   getRestaurantById,
+//   updateRestaurant,
+//   deleteRestaurant,
+// } = require("../controllers/restaurantController");
+
+// const { auth } = require("../middlewares/auth");
+// const { adminAuth } = require("../middlewares/admin");
+
+// router.post("/add", auth, adminAuth, addRestaurant);
+// router.get("/", getAllRestaurants);
+// router.get("/:id", getRestaurantById);
+// router.put("/:id", auth, adminAuth, updateRestaurant);
+// router.delete("/:id", auth, adminAuth, deleteRestaurant);
+
+// module.exports = router;
+
+// 🔥 Step 4 – Mount Route in server.js
+// const restaurantRoutes = require("./routes/restaurantRoutes");
+
+// app.use("/api/restaurants", restaurantRoutes);
+
+// 🎉 Task 8 Completed: Admin Restaurant Module Ready
+
+// Admin can now:
+
+// ✔ Add restaurant
+// ✔ Update restaurant
+// ✔ Delete restaurant
+// ✔ View all restaurants
+// ✔ View one restaurant
+
+// Exactly real-world Zomato style.

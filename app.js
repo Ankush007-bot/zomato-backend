@@ -21,6 +21,11 @@ const auth = require("./src/middlewares/authMiddleware");
 const authRoutes = require("./src/routes/authRoutes");
 const protectedRoutes = require("./src/routes/protectedRoutes");
 
+
+const restaurantRoutes = require("./src/routes/restaurantRoutes");
+
+app.use("/api/restaurants", restaurantRoutes);
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/protected", protectedRoutes);
