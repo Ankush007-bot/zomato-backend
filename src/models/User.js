@@ -29,18 +29,25 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-     refreshToken: {
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+
+
+    refreshToken: {
       type: String,
       default: null,
     },
     otp: {
-  type: String,
-  default: null,
-},
-otpExpiry: {
-  type: Date,
-  default: null,
-},
+      type: String,
+      default: null,
+    },
+    otpExpiry: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }    //“Har document ke sath createdAt aur updatedAt auto-add kar de.”
 );
